@@ -1,0 +1,99 @@
+
+import re
+import requests
+import pdfplumber
+import pandas as pd
+from collections import namedtuple
+
+Line = namedtuple('Line', 'lineNum partNum qty custName address1 city state zip poNumber')
+
+cust_re = re.compile(r'(.*) Customer Order Number:')
+line2_re = re.compile(r'\d\d\d \d\d\d\d\d\d\d (.*)')
+line3_re = re.compile(r'(.*,) (\w\w) (\d+) PO Number: (\d+)')
+line4_re = re.compile(r'\w* (\d\d\d\d\d\d) (\d*) \d*')
+
+
+file = 'lowes slips 7-24.pdf'
+city = 'test'
+state = 'test'
+zip = 'test'
+poNumber = 'test'
+list = []
+total_check = 0
+with pdfplumber.open(file) as pdf:
+    pages = pdf.pages
+    for page in pdf.pages:
+        count = 0
+        flag = 0
+        text = page.extract_text()
+        for line in text.split('\n'):
+            print(line)
+            comp = cust_re.search(line)
+            if comp:
+                custName = comp.group(1)
+                print('group 1 \n')
+                print(comp.group(1))
+                custName = custName.split(' ', 1)[1]
+                custName = custName.split(' ', 1)[1]
+                print(custName)
+            lin2 = line2_re.search(line)
+            if lin2:
+                address1 = lin2.group(1)
+                print(address1)
+
+            lin3 = line3_re.search(line)
+            if lin3:
+                city = lin3.group(1)
+                city = city.replace(',','')
+                state = lin3.group(2)
+                zip = lin3.group(3)
+                poNumber = lin3.group(4)
+                print(city + ' ' + state + ' ' + zip + ' ' + poNumber)
+            if count > 0:
+                lin4 = line4_re.search(line)
+                if lin4:
+                    lineNum = 1
+                    flag = 1 #stops normal Line 4 from happening because we found an extra one
+                    list.append(Line(lineNum, partNum, qty, custName, address1, city, state, zip, poNumber))
+                    partNum = lin4.group(1)
+                    qty = lin4.group(2)
+                    lineNum = 2
+                    print("found extra line")
+            lin4 = line4_re.search(line)
+            if lin4 and flag == 0:
+                count =+ 1
+                print('\n lin4 hit')
+                partNum = lin4.group(1)
+                qty = lin4.group(2)
+                lineNum = 1
+                print(partNum)
+        #
+        # if partNum == '116100':
+        #     price = 120
+        # if partNum == '115115':
+        #     print("hit price")
+        #     price = 46
+        # if partNum == '117130':
+        #     price = 50
+        # if partNum == '112101':
+        #     price = 198
+        # if partNum == '117130':
+        #     price = 50
+        # if partNum == '112100':
+        #     price = 170
+        print("test")
+        print(city)
+        list.append(Line(lineNum, partNum, qty, custName, address1, city, state, zip, poNumber))
+
+print(list)
+df = pd.DataFrame(list)
+df.head()
+df.info()
+df.to_csv('lowes output.csv',index=False)
+
+# check to make sure sold to name is only two words
+# check to see if there are multiple item lines
+# make sure output csv file is closed
+# check to see if Ship To lines are correct and address don't spill onto second lines.
+#    -if this happens, program will still run but the address through PO
+
