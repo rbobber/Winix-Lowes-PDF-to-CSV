@@ -1,6 +1,7 @@
 # Winix-Lowes-PDF-to-CSV
-Use this python program to extract important lines of text from the Lowes PDF Invoice and arrange data into CSV file. 
+This python program extracts important lines of text from the Lowes Invoice PDFs and arranges the data into a line on the CSV file for each order.
 
 Program matches and extracts these details: PO number, Customer Name, Address, Line Number, Product Number, and Quantity
 
 This CSV file can then be uploaded to EDI system.
+
