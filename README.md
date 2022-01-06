@@ -3,5 +3,5 @@ This python program extracts important lines of text from the Lowes Invoice PDFs
 
 Program matches and extracts these details: PO number, Customer Name, Address, Line Number, Product Number, and Quantity
 
-This CSV file can then be uploaded to EDI system.
+This CSV file can then be uploaded to EDI/ERP system for further order processing.
 
